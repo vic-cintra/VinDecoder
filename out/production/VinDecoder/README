@@ -1,0 +1,30 @@
+Victor Cintra
+July 2022
+VIN Decoder
+
+The purpose of this project is to decode almost any VIN (vehicle identification number). The files included are main, nestedNHTSAFileLoader, testFileLoader, processFromFile, processFromInput, and VINLoader.
+
+"ExampleOutput" contains a run using the current test file. The first section is the original, and the second section scans only the VIN to output the information.
+
+Main:
+This file runs the main program. The methods are WMI, VDS, Year, and main. WMI uses the first 3 digits to find a car make. Then VDS uses this make to find the model. Car manufacturers use regex to provide different variations of the 5 digit VDS code, so we implement regex to decipher the key and make matches. The year is a straightforward map that depends on the 9th digit. The user also has the choice to choose between "input" and "file". If someone had a large batch of VINS to decode, then file would be the more appropriate choice. You can also select input to do one at a time. Finally, the main file also outputs a SHA-256 encrypted version of the VIN for security purposes should someone need it.
+
+VINLoader:
+The VINLoader loads the Make.csv, Model.csv, VehicleYear.csv, wmiID.csv, and wmiMakeID.csv files. This is a standard loader that uses Apache Commons, a buffer reader, and a hashmap.
+
+TestFileLoader:
+This file loads the "VINTestFile.csv" and prepares it for testing. If you would like to add more large batch VINs, add them to the "VINTestFile.csv" and it will automatically add them to the loader.
+
+NestedNHTSAFileLoader:
+This file creates a nested hashmap with type <String, <Hashmap<String, String>>. The first hashmap serves to find the make of the car. The second serves to find the specific VIN as well as model. The reason this has to be nested is because many different car companies use the same VIN numbers from position 3-8, and ensuring that the correct car company gets matched reduces incorrect VIN matches.
+
+The files are related in this way
+wmiID.csv -> wmiMakeID.csv -> Make.csv
+MakeVINModel.csv -> Model.csv
+
+The “wmiID.csv” has the first 3 digits of the vin, which matches to a number. The number then is used in “wmiMakeID.csv” to find the make ID of a manufacturer, and finally it is taken to “Make.csv” to be matched. Interestingly, Nissan uses the same manufacturer ID as Infiniti, as they are the same company rebranded. This is similar to how Toyota is Lexus and Honda is Acura, the difference is they both use different identification codes. This resulted in my decision to change Infiniti to Nissan as a whole for the make.
+
+The resource folder holds many files that are used to complete the vin lookup as well as a test file. The information was sourced from the NHTSA website, where there is a total of 1GB of data with different VINs. This is a pretty big amount of data considering VINs are just made up of 5 different sections totalling 17 characters total. I used a docker as well as a Azure data studio (SQL) to find relevant automotive VINS. The NHTSA database contained huge amounts of irrelevant information so this was very important to do. Using SQL, I was able to get rid of 80,000 irrelevant options for wmiID and wmiMakeID, increasing the speed and accuracy of the program.
+
+Overview:
+This project was very rewarding and I am happy with the way it turned out. I think it works very well at this point. Eventually I would like to use APIs to make it publicly accessible and make a small website so everyone can use it.
